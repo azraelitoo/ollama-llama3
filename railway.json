@@ -1,0 +1,12 @@
+{
+  "build": {
+    "env": {
+      "OLLAMA_MODELS": "llama3"
+    }
+  },
+  "deploy": {
+    "startCommand": "ollama serve",
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
