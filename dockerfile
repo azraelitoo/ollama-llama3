@@ -1,11 +1,14 @@
-# Usa imagem oficial do Ollama
-FROM ollama/ollama
+FROM ubuntu:22.04
 
-# Faz o download do modelo LLaMA3 ao buildar
-RUN ollama pull llama3
+# Instala dependências básicas + curl
+RUN apt update && apt install -y curl wget unzip git sudo
 
-# Expondo a porta padrão
-EXPOSE 11434
+# Baixa o Ollama e instala
+RUN curl -fsSL https://ollama.com/download/Ollama-linux.zip -o ollama.zip \
+  && unzip ollama.zip \
+  && mv ollama /usr/local/bin/ollama \
+  && chmod +x /usr/local/bin/ollama \
+  && rm -rf ollama.zip
 
-# Inicia o Ollama
-CMD ["ollama", "serve"]
+# Puxa o modelo no início do container (não durante o build!)
+CMD ollama serve & sleep 5 && ollama pull llama3 && tail -f /dev/null
