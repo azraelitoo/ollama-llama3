@@ -1,27 +1,22 @@
-FROM ubuntu:22.04
+FROM python:3.11-slim
 
-# Evita prompts interativos
-ENV DEBIAN_FRONTEND=noninteractive
+# Instala ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
-# Instala dependências: Node, FFmpeg e utilitários
-RUN apt-get update && apt-get install -y \
-    curl \
-    nodejs \
-    npm \
-    ffmpeg \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Cria diretório da aplicação
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia arquivos do projeto
+# Copia tudo para o container
 COPY . .
 
-# Instala dependências do Node.js
-RUN npm install
+# Instala dependências
+RUN pip install flask requests
 
-# Expõe a porta
-EXPOSE 3000
+# Cria pasta de saída de vídeos
+RUN mkdir -p videos
 
-# Comando de inicialização
-CMD ["npm", "start"]
+# Expõe a porta usada no app.py
+EXPOSE 8000
+
+# Comando para iniciar o servidor Flask
+CMD ["python", "app.py"]
