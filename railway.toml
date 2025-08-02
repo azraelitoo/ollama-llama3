@@ -1,2 +1,5 @@
 [build]
 dockerfile = "Dockerfile"
+
+[start]
+cmd = "node server.js"
