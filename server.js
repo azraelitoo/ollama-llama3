@@ -10,10 +10,9 @@ app.post('/create_video', (req, res) => {
     return res.status(400).json({ error: 'Missing title or audio_url' });
   }
 
-  // Simulação de criação do vídeo
-  const videoUrl = `https://example.com/videos/${title.replace(/\s+/g, '_')}.mp4`;
-
-  res.json({ video_url: videoUrl });
+  // Simula a geração de um vídeo
+  const video_url = `https://example.com/videos/${encodeURIComponent(title)}.mp4`;
+  res.json({ video_url });
 });
 
 app.listen(port, () => {
