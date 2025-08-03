@@ -1,7 +1,8 @@
 models:
   - name: nomic-embed-text-v1.5
-    backend: llama.cpp
+    backend: gpt4all
     parameters:
-      model: /models/nomic-embed-text-v1.5.Q4_K_M.gguf
       f16: true
-      type: embedding
+    context_size: 4096
+    embedding_only: true
+    model_file: /models/nomic-embed-text-v1.5.Q4_K_M.gguf
