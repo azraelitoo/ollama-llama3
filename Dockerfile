@@ -1,24 +1,24 @@
 FROM python:3.11-slim
 
-# Instala o ffmpeg e limpa cache de pacotes
+# Instala ffmpeg e remove cache
 RUN apt-get update && \
     apt-get install -y ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-# Define o diretório de trabalho
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia todos os arquivos para o container
+# Copia os arquivos do projeto
 COPY . .
 
-# Instala as dependências Python
-RUN pip install flask requests
+# Instala dependências
+RUN pip install flask requests gunicorn
 
-# Garante que as pastas de saída existam
+# Cria diretórios para saída
 RUN mkdir -p videos images
 
-# Expõe a porta 8000 (a mesma usada pelo Flask)
+# Expõe a porta padrão do Railway
 EXPOSE 8000
 
-# Comando para iniciar a aplicação
-CMD ["python", "app.py"]
+# Executa com servidor WSGI de produção
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8000"]
