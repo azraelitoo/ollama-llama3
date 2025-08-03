@@ -1,5 +1,9 @@
-[build]
-dockerfile = "Dockerfile"
+[[services]]
+name = "flask-api"
+start = { cmd = "python app.py" }
+build = { dockerfile = "Dockerfile" }
 
-[start]
-cmd = ""
+[[services]]
+name = "localai"
+start = { cmd = "local-ai --models-path /models --config-file /models/models.yaml --host 0.0.0.0 --port ${PORT:-8080}" }
+build = { dockerfile = "localai/Dockerfile" }

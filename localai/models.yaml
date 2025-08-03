@@ -1,0 +1,7 @@
+models:
+  - name: nomic-embed-text-v1.5
+    backend: llama.cpp
+    parameters:
+      model: /models/nomic-embed-text-v1.5.Q4_K_M.gguf
+      f16: true
+      type: embedding

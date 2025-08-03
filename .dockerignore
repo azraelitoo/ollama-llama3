@@ -1,4 +1,11 @@
-node_modules
-npm-debug.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.env
 .env
 .git
+node_modules
+npm-debug.log

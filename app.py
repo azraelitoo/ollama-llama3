@@ -83,7 +83,6 @@ def criar_video():
         "-movflags", "+faststart",
         video_sem_audio
     ]
-    print(f"[1/2] Criando vídeo visual: {' '.join(cmd_img_video)}")
     subprocess.run(cmd_img_video, check=True)
 
     cmd_merge = [
@@ -97,13 +96,11 @@ def criar_video():
         "-movflags", "+faststart",
         video_final
     ]
-    print(f"[2/2] Adicionando áudio: {' '.join(cmd_merge)}")
     subprocess.run(cmd_merge, check=True)
 
     for temp_file in [audio_path, image_path, video_sem_audio]:
         if os.path.exists(temp_file):
             os.remove(temp_file)
-            print(f"[LIMPEZA] Removido: {temp_file}")
 
     video_url = f"https://{request.host}/videos/{os.path.basename(video_final)}"
     return jsonify({"success": True, "video_url": video_url}), 200
@@ -121,7 +118,6 @@ def criar_imagem():
     base = f"{title}_{timestamp}".replace(" ", "_")
     output_path = f"images/{base}.png"
 
-    # Truncar para não quebrar a imagem (máximo ~80 caracteres visíveis)
     texto = f"{title} - {prompt}"
     texto = (texto[:80] + "...") if len(texto) > 80 else texto
 
@@ -135,16 +131,12 @@ def criar_imagem():
     ]
 
     try:
-        print(f"[FFMPEG] Criando imagem com texto: {' '.join(cmd)}")
         subprocess.run(cmd, check=True)
     except Exception as e:
         return jsonify({'error': f'Erro ao gerar imagem: {e}'}), 500
 
     image_url = f"https://{request.host}/images/{os.path.basename(output_path)}"
-    return jsonify({
-        "success": True,
-        "image_url": image_url
-    }), 200
+    return jsonify({"success": True, "image_url": image_url}), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8000))
