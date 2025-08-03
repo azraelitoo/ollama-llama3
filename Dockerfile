@@ -1,22 +1,24 @@
 FROM python:3.11-slim
 
-# Instala ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Instala ffmpeg e dependências básicas
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
 # Define diretório de trabalho
 WORKDIR /app
 
-# Copia tudo para o container
+# Copia arquivos para dentro do container
 COPY . .
 
-# Instala dependências
+# Instala dependências Python
 RUN pip install flask requests
 
-# Cria pasta de saída de vídeos
-RUN mkdir -p videos
+# Garante que as pastas de saída existam
+RUN mkdir -p videos images
 
-# Expõe a porta usada no app.py
+# Expõe a porta padrão usada no app Flask
 EXPOSE 8000
 
-# Comando para iniciar o servidor Flask
+# Comando para rodar o servidor Flask
 CMD ["python", "app.py"]

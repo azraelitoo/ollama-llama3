@@ -6,9 +6,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 os.makedirs("videos", exist_ok=True)
-os.makedirs("images", exist_ok=True)  # NOVO: diretório de imagens
+os.makedirs("images", exist_ok=True)
 
-# --- Rotas para servir arquivos ---
 @app.route('/videos/<path:filename>')
 def serve_video(filename):
     return send_from_directory("videos", filename)
@@ -17,7 +16,6 @@ def serve_video(filename):
 def serve_image(filename):
     return send_from_directory("images", filename)
 
-# --- Utilitários ---
 def baixar_arquivo(url, destino):
     try:
         print(f"[DEBUG] Baixando: {url} → {destino}")
@@ -48,7 +46,6 @@ def obter_duracao_em_segundos(arquivo_audio):
         print(f"[ERRO] ffprobe falhou: {e}")
         return 60.0
 
-# --- Endpoint: Geração de Vídeo com imagem ---
 @app.route('/create_video', methods=['POST'])
 def criar_video():
     data = request.get_json()
@@ -109,33 +106,30 @@ def criar_video():
             print(f"[LIMPEZA] Removido: {temp_file}")
 
     video_url = f"https://{request.host}/videos/{os.path.basename(video_final)}"
+    return jsonify({"success": True, "video_url": video_url}), 200
 
-    return jsonify({
-        "success": True,
-        "video_url": video_url
-    }), 200
-
-# --- NOVO: Endpoint de geração de imagem com texto ---
 @app.route('/create_image', methods=['POST'])
 def criar_imagem():
     data = request.get_json()
     if not data or 'title' not in data or 'prompt' not in data:
         return jsonify({'error': 'Parâmetros ausentes'}), 400
 
-    title = data['title']
-    prompt = data['prompt']
+    title = data['title'].strip().replace("'", "’")
+    prompt = data['prompt'].strip().replace("'", "’")
+
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     base = f"{title}_{timestamp}".replace(" ", "_")
     output_path = f"images/{base}.png"
 
-    # Corrigir apóstrofos para evitar quebra do ffmpeg
-    text = f"{title} - {prompt}".replace("'", "’")
+    # Truncar para não quebrar a imagem (máximo ~80 caracteres visíveis)
+    texto = f"{title} - {prompt}"
+    texto = (texto[:80] + "...") if len(texto) > 80 else texto
 
     cmd = [
         "ffmpeg", "-y",
         "-f", "lavfi",
         "-i", "color=c=black:s=1280x720",
-        "-vf", f"drawtext=text='{text}':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=(h-text_h)/2",
+        "-vf", f"drawtext=text='{texto}':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5",
         "-frames:v", "1",
         output_path
     ]
@@ -152,7 +146,6 @@ def criar_imagem():
         "image_url": image_url
     }), 200
 
-# --- Executar app ---
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
