@@ -102,7 +102,7 @@ def criar_video():
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
-    video_url = f"https://{request.host}/videos/{os.path.basename(video_final)}"
+    video_url = f"http://{request.host}/videos/{os.path.basename(video_final)}"
     return jsonify({"success": True, "video_url": video_url}), 200
 
 @app.route('/create_image', methods=['POST'])
@@ -135,8 +135,32 @@ def criar_imagem():
     except Exception as e:
         return jsonify({'error': f'Erro ao gerar imagem: {e}'}), 500
 
-    image_url = f"https://{request.host}/images/{os.path.basename(output_path)}"
+    image_url = f"http://{request.host}/images/{os.path.basename(output_path)}"
     return jsonify({"success": True, "image_url": image_url}), 200
+
+@app.route('/generate_audio', methods=['POST'])
+def gerar_audio():
+    data = request.get_json()
+    texto = data.get("texto")
+    nome = data.get("nome", "narracao")
+
+    if not texto:
+        return jsonify({"error": "Texto não fornecido"}), 400
+
+    from TTS.api import TTS
+    tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False)
+
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    arquivo = f"{nome}_{timestamp}.mp3"
+    caminho = os.path.join("videos", arquivo)
+
+    try:
+        tts.tts_to_file(text=texto, file_path=caminho)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    audio_url = f"http://{request.host}/videos/{arquivo}"
+    return jsonify({"success": True, "audio_url": audio_url})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8000))
